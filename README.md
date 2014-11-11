@@ -18,4 +18,4 @@ as shown below.
               ¦       +-- D_L001_R2_001.fastq.gz
 
 The jobs for each of the samples will be launched in parallel onto cluster. The script can be customised to include additional 
-executable statements. 
+executable statements. The gene\_count table for each sample will be available in folder DESeq\_Project_dir. 
