@@ -4,28 +4,34 @@ use warnings;
 use FileHandle;
 use Getopt::Long;
 use File::Basename;
+use Pod::Usage;
+
 my $index;
 my $annotation_file;
 my $genome_fasta;
 my $scripts_out;
-my $project_folder;
-my $stranded;
-GetOptions('index=s'            => \$index,				#bowtie index base
-           'annotation_file=s'  => \$annotation_file,			#gtf file
-    	   'genome_fasta=s' 	=> \$genome_fasta,			#ref. genome in multi-fasta format
-    	   'scripts_out=s'   	=> \$scripts_out,			#Script_out file containing executable commands for all Sample folders
-	   'stranded=s'		=> \$stranded,				#strand info required for htseq 
-    	   'project_folder=s' 	=> \$project_folder );			#Main Project_Dir containing Sample folders with fastq files; R1 and R2
-(!$index or !$annotation_file or !$genome_fasta or !$scripts_out or !$project_folder ) and die ("Usage : job_script.pl --index <bowtie_index> --annotation_file <gtf_file> --genome_fasta <reference_genome_fasta_file> --stranded <yes/no/reverse> --project_folder <project_directory_containing_sample_folders_with_fastq_files> --scripts_out <output_file>\n");
-
+my $project_dir;
+my $is_stranded;
+my $help;
+my $man;
+GetOptions('index=s'            => \$index,				
+           'annotation_file=s'  => \$annotation_file,			
+  	   'genome_fasta=s' 	=> \$genome_fasta,			
+    	   'scripts_out=s'   	=> \$scripts_out,			
+	   'is_stranded=s'	=> \$is_stranded,			 
+	   'help|?' 		=> \$help,
+	   'man' 		=> \$man,
+ 	   'project_dir=s' 	=> \$project_dir ) or pod2usage(-verbose => 2);
+	   pod2usage(-verbose => 1)  if ($help);
+	   pod2usage(-verbose => 2)  if ($man);
+#	   pod2usage("$0: Please provide options.For more details try job_script.pl --help \n") unless @ARGV;
 
 my $ref_genome_index_base = $index;
 my $gtf = $annotation_file;
-my $parent = $project_folder;
-my $strand_info = $stranded;
-my $fullpath = $project_folder;
+my $parent = $project_dir;
+my $strand_info = $is_stranded;
+my $fullpath = $project_dir;
 my $base_dir = basename($fullpath);
-#print "file = $base_dir\n";
 my $DESeq_anl_fol = `mkdir $parent/../DESeq_$base_dir`; 
 my $par_dir;
 my $sub_dir;
@@ -93,22 +99,85 @@ my $split_count = $count_lines/$count_folder; ##
 close($par_dir);
 
 #######################################################################################################################################################
-################ Split the scripts_out file to create separate submission file for each sample_folder and then submit all of them simeltaneously ######
-################---------------------------------------------------------------------------------------------------------------------------------######
+################ Split the scripts_out file to create separate submission file for each sample_folder and launch parallely onto cluster ###############
+################========================================================================================================================###############
 
-    my$split_command=`split -l $split_count  -d $scripts_out NEW_job`; ## split scripts_out to create separate submission file for each sample/replicate
-    my@split_array = glob "NEW_job*";
-   #print "$split_array[0]\n";
-   	 my $pattern = $base_dir;
-	 foreach my $split_file(@split_array) {
-	 open (my $splitfile,"<$split_file");
-	 while (my$splitline = <$splitfile>) {
-		if ($splitline =~/$pattern\/\S+\/$/){
-			print "...........................$1\n"; 
-			}
-			last;
-	 }
-	
-   `qsub -l select=1:ncpus=1:mem=12GB -l walltime=70:00:00  $split_file`;
-   }
+my $split_command=`split -l $split_count  -d $scripts_out sub_job`; ## split scripts_out to create separate submission file for each sample/replicate
+my @split_array = glob "sub_job*";
+#print "$split_array[0]\n";
+my $pattern = $base_dir;
+foreach my$split_file(@split_array) {
+          open (my $splitfile,"<$split_file");
+          while (my$splitline = <$splitfile>) {
+                     if ($splitline =~/$pattern\/(\S+)\//){
+                        `mv $split_file SUB_$1`;
+		    	`qsub -l select=1:ncpus=1:mem=12GB -l walltime=70:00:00  SUB_$1`;
+	             	 last;
+      			}
+    	  }
+ }
+   
+__END__
 
+=head1 NAME
+
+job_script.pl 
+
+=head1 SYNOPSIS
+
+perl job_script.pl [options]
+
+  Options:
+
+   --index
+   --annotation_file     
+   --genome_fasta     
+   --project_dir
+   --scripts_out
+   --is_stranded
+
+   Example:
+	./job_script.pl --index /home/RNASeq/genome/Sequence/Bowtie2Index/genome --annotation_file /home/RNASeq/genome/annotation/genes.gtf --genome_fasta /home/RNASeq/genome/Sequence/WholeGenomeFasta/genome.fa --project_dir Project_TEST --scripts_out scripts.out --is_stranded yes
+
+=head1 DESCRIPTION
+
+##
+Begining from tophat till htseq-count, this program creates executable commands for all samples in a Project_Dir.
+It also launches these jobs onto cluster in parallel.
+##
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--index>
+
+bowtie2 index prefix of the genome
+
+=item B<--annotation_file>
+
+.gtf file; Provide Reference annotation preferably from Ensembl
+
+=item B<--genome_fasta>
+
+Provide reference genome multi-fasta file
+
+=item B<--project_dir>
+
+Input Project directory which contains sample_folders with reads
+
+=item B<--scripts_out>
+
+Provide output file name; executable commands for all Sample folders will be written in this single file
+
+=item B<--is_stranded>
+
+yes or no or reverse as required by htseq-count
+
+=back
+
+=head1 COPYRIGHT
+
+This program is free software and can redistributed and/or modified.
+
+=cut
