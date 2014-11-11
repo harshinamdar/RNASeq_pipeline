@@ -66,6 +66,8 @@ while (my $sub_folders = readdir($par_dir)) {
     }
          	close($sub_dir);
 		$count_folder++;  ## counting no. of sample_folders
+       	
+       	## GENERATE COMMANDS #####################################################################################################
        		### Now print list of commands to be executed for each sample_folder into output file ==> scripts_out ####
 		###------------------------------------------------------------------------------------------------------####
 	 	print $outfile "cd \$PBS_O_WORKDIR\n\n"; 
@@ -88,7 +90,7 @@ while (my $sub_folders = readdir($par_dir)) {
 	 	print $outfile "mv $path/tophat_out_$sub_folders/$sub_folders.gene_counts $parent/../DESeq_$base_dir\n\n";
 }  
 		close($outfile);
-
+        ########################################################################################################################
 my $count_lines;	
 open (my $infile,"<$scripts_out");
 while (<$infile>) {
