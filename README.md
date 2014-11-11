@@ -18,4 +18,4 @@ as shown below.
               ¦       +-- D_L001_R2_001.fastq.gz
 
 The jobs for each of the samples will be launched in parallel onto cluster. The script can be customised to include additional 
-executable staements. 
+executable statements. 
