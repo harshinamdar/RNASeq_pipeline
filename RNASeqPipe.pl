@@ -121,7 +121,7 @@ __END__
 
 =head1 NAME
 
-job_script.pl 
+RNASeqPipe.pl 
 
 =head1 SYNOPSIS
 
