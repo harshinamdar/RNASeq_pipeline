@@ -24,7 +24,7 @@ GetOptions('index=s'            => \$index,
  	   'project_dir=s' 	=> \$project_dir ) or pod2usage(-verbose => 2);
 	   pod2usage(-verbose => 1)  if ($help);
 	   pod2usage(-verbose => 2)  if ($man);
-#	   pod2usage("$0: Please provide options.For more details try job_script.pl --help \n") unless @ARGV;
+#	   pod2usage("$0: Please provide options.For more details try RNASeqPipe.pl --help \n") unless @ARGV;
 
 my $ref_genome_index_base = $index;
 my $gtf = $annotation_file;
@@ -125,7 +125,7 @@ job_script.pl
 
 =head1 SYNOPSIS
 
-perl job_script.pl [options]
+perl RNASeqPipe.pl [options]
 
   Options:
 
@@ -137,7 +137,7 @@ perl job_script.pl [options]
    --is_stranded
 
    Example:
-	./job_script.pl --index /home/RNASeq/genome/Sequence/Bowtie2Index/genome --annotation_file /home/RNASeq/genome/annotation/genes.gtf --genome_fasta /home/RNASeq/genome/Sequence/WholeGenomeFasta/genome.fa --project_dir Project_TEST --scripts_out scripts.out --is_stranded yes
+	./RNASeqPipe.pl --index /home/RNASeq/genome/Sequence/Bowtie2Index/genome --annotation_file /home/RNASeq/genome/annotation/genes.gtf --genome_fasta /home/RNASeq/genome/Sequence/WholeGenomeFasta/genome.fa --project_dir Project_TEST --scripts_out scripts.out --is_stranded yes
 
 =head1 DESCRIPTION
 
