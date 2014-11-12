@@ -24,7 +24,7 @@ GetOptions('index=s'            => \$index,
  	   'project_dir=s' 	=> \$project_dir ) or pod2usage(-verbose => 2);
 	   pod2usage(-verbose => 1)  if ($help);
 	   pod2usage(-verbose => 2)  if ($man);
-#	   pod2usage("$0: Please provide options.For more details try job_script.pl --help \n") unless @ARGV;
+#	   pod2usage("$0: Please provide options.For more details try RNASeqPipe.pl --help \n") unless @ARGV;
 
 my $ref_genome_index_base = $index;
 my $gtf = $annotation_file;
@@ -66,6 +66,8 @@ while (my $sub_folders = readdir($par_dir)) {
     }
          	close($sub_dir);
 		$count_folder++;  ## counting no. of sample_folders
+       	
+       	## GENERATE COMMANDS #####################################################################################################
        		### Now print list of commands to be executed for each sample_folder into output file ==> scripts_out ####
 		###------------------------------------------------------------------------------------------------------####
 	 	print $outfile "cd \$PBS_O_WORKDIR\n\n"; 
@@ -88,7 +90,7 @@ while (my $sub_folders = readdir($par_dir)) {
 	 	print $outfile "mv $path/tophat_out_$sub_folders/$sub_folders.gene_counts $parent/../DESeq_$base_dir\n\n";
 }  
 		close($outfile);
-
+        ########################################################################################################################
 my $count_lines;	
 open (my $infile,"<$scripts_out");
 while (<$infile>) {
@@ -121,11 +123,11 @@ __END__
 
 =head1 NAME
 
-job_script.pl 
+RNASeqPipe.pl 
 
 =head1 SYNOPSIS
 
-perl job_script.pl [options]
+perl RNASeqPipe.pl [options]
 
   Options:
 
@@ -137,7 +139,7 @@ perl job_script.pl [options]
    --is_stranded
 
    Example:
-	./job_script.pl --index /home/RNASeq/genome/Sequence/Bowtie2Index/genome --annotation_file /home/RNASeq/genome/annotation/genes.gtf --genome_fasta /home/RNASeq/genome/Sequence/WholeGenomeFasta/genome.fa --project_dir Project_TEST --scripts_out scripts.out --is_stranded yes
+	./RNASeqPipe.pl --index /home/RNASeq/genome/Sequence/Bowtie2Index/genome --annotation_file /home/RNASeq/genome/annotation/genes.gtf --genome_fasta /home/RNASeq/genome/Sequence/WholeGenomeFasta/genome.fa --project_dir Project_TEST --scripts_out scripts.out --is_stranded yes
 
 =head1 DESCRIPTION
 
