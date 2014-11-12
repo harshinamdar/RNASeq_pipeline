@@ -13,18 +13,18 @@ ENSMUST00000160022      -       -       ENSMUSG00000025912      Mybl1   TSS66543
 ENSMUST00000160451      -       -       ENSMUSG00000025912      Mybl1   TSS49637        1:9678271-9683452       695     3.47795 0.986642        0.15403 1.81925 OK
 
 =cut
-#usage: perl extract_abundant_transcript.pl 
+#usage: perl extract_abundant_transcript.pl isoforms.fpkm_tracking
 
 my $infile;
 open($infile, "<$ARGV[0]") or die "cant find file\n" ; 
 my %multi_hash;
-my $header=<$infile>; ## capture header to avoid being read in while loop;
+my $header = <$infile>; ## capture header to avoid being read in while loop;
 while (my $line = <$infile>) {
     chomp $line;
     my @arr = split(/\t/, $line);
-    my $gene_id=$arr[3];
-    my $trans_id=$arr[0];
-    my $fpkm = $arr[9];
+    my $gene_id  = $arr[3];
+    my $trans_id = $arr[0];
+    my $fpkm     = $arr[9];
     $multi_hash{$gene_id}{$trans_id} = $fpkm;
 }
 
@@ -33,4 +33,3 @@ for my $gen_id (sort keys %multi_hash) {
     my $key = (reverse sort { $h{$a} <=> $h{$b} } keys %h)[0]; ## [0] indicates first value in array; which is the highest fpkm value
     print "$gen_id\t$key\t$multi_hash{$gen_id}{$key}\n";
 }
-
