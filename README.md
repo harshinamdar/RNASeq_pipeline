@@ -20,6 +20,6 @@ as shown below.
 The jobs for each of the samples will be launched in parallel onto cluster. The script can be customised to include additional 
 executable statements. The gene\_count table for each sample will be available in folder DESeq\_Project_dir. 
 
-This script currently caters to single Project\_folder. Future update will see processing of multiple Project\_dir.
+This script currently caters to single Project\_dir. Future update will see processing of multiple Project\_dir.
 
 For Quick tutorial on DESeq [Visit Here](http://harshinamdar.wordpress.com/2014/11/11/quick-tutorial-on-deseq2/)
