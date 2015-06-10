@@ -19,13 +19,17 @@ GetOptions('index=s'            => \$index,
   	   'genome_fasta=s' 	=> \$genome_fasta,			
     	   'scripts_out=s'   	=> \$scripts_out,			
 	   'is_stranded=s'	=> \$is_stranded,			 
-	   'help|?' 		=> \$help,
-	   'man' 		=> \$man,
- 	   'project_dir=s' 	=> \$project_dir ) or pod2usage(-verbose => 2);
+	   'help!' 		=> \$help,
+	   'man!' 		=> \$man,
+ 	  'project_dir=s'     => \$project_dir );
+	  # 'project_dir=s' 	=> \$project_dir ) or pod2usage(-verbose => 0);
+          # 'project_dir=s'      => \$project_dir ) or pod2usage("Try '$0 --help' for more information.") unless $ARGV;
 	   pod2usage(-verbose => 1)  if ($help);
 	   pod2usage(-verbose => 2)  if ($man);
-#	   pod2usage("$0: Please provide options.For more details try RNASeqPipe.pl --help \n") unless @ARGV;
-
+unless ( defined( $project_dir ) && defined( $index ) )
+    {
+        Pod::Usage::pod2usage( -exitstatus => 1);
+    }
 my $ref_genome_index_base = $index;
 my $gtf = $annotation_file;
 my $parent = $project_dir;
@@ -65,18 +69,22 @@ while (my $sub_folders = readdir($par_dir)) {
 
     }
          	close($sub_dir);
-		$count_folder++;  ## counting no. of sample_folders
-       	
-       	## GENERATE COMMANDS #####################################################################################################
-       		### Now print list of commands to be executed for each sample_folder into output file ==> scripts_out ####
+		
+		my $basedir = basename($path);
+                my $jobname  = "job".'_'.$basedir;
+                open($outfile,">$jobname");
+
+		### Now print list of commands to be executed for each sample_folder into output file ==> scripts_out ####
 		###------------------------------------------------------------------------------------------------------####
 	 	print $outfile "cd \$PBS_O_WORKDIR\n\n"; 
-         	print $outfile "module add tophat/2.0.8\n\n"; 
+         	print $outfile "module add tophat/2.0.11\n\n"; 
          	print $outfile "module add bowtie2/2.1.0\n\n"; 
 	        print $outfile "module add samtools/0.1.18\n\n";
 		print $outfile "module add python/2.7.3\n\n";
          	print $outfile "module add htseq/0.5.4p3\n\n";
-	        print $outfile "tophat -p 8 -G $gtf -o $path/tophat_out_$sub_folders $ref_genome_index_base $R1 $R2\n\n";
+		print $outfile "module add cufflinks/2.2.1\n\n";
+                print $outfile "module add rseqc/2.3.7\n\n";
+	        print $outfile "tophat --library-type fr-firststrand -r 100 -p 8 -G $gtf -o $path/tophat_out_$sub_folders $ref_genome_index_base $R1 $R2\n\n";
 
 	 	### Can submit other jobs immeditely after tophat alignment : for ex; submitting a simeltaneous cufflinks job as shown below :
 		#print $outfile "echo cufflinks -p 8 -N -G $gtf  -M \$DM3_MASK_GTF -b $ref_genome_fasta -o $path/tophat_out_$sub_folders/cufflinks_$sub_folders -u --compatible-hits-norm $path/tophat_out_$sub_folders/accepted_hits.bam| qsub -N cuff_$sub_folders -V -cwd \n\n";
@@ -88,37 +96,10 @@ while (my $sub_folders = readdir($par_dir)) {
 	 	print $outfile "sed -i -e '1igene $sub_folders\' $path/tophat_out_$sub_folders/$sub_folders.gene_count\n\n";
 	 	print $outfile "awk -v OFS=\"\\t\" '\$1=\$1' $path/tophat_out_$sub_folders/$sub_folders.gene_count > $path/tophat_out_$sub_folders/$sub_folders.gene_counts\n\n";
 	 	print $outfile "mv $path/tophat_out_$sub_folders/$sub_folders.gene_counts $parent/../DESeq_$base_dir\n\n";
-}  
+		print $outfile " read_NVC.py -i $path/tophat_out_$sub_folders/accepted_hits.bam -o $path/tophat_out_$sub_folders/RseqC_$sub_folders -x \n\n";
 		close($outfile);
-        ########################################################################################################################
-my $count_lines;	
-open (my $infile,"<$scripts_out");
-while (<$infile>) {
-	chomp $_;
-	$count_lines++; ##counting no. of lines in scripts_out
+	       `qsub -l select=1:ncpus=1:mem=12GB -l walltime=70:00:00 $jobname`;
 }
-my $split_count = $count_lines/$count_folder; ## 
-close($par_dir);
-
-#######################################################################################################################################################
-################ Split the scripts_out file to create separate submission file for each sample_folder and launch parallely onto cluster ###############
-################========================================================================================================================###############
-
-my $split_command=`split -l $split_count  -d $scripts_out sub_job`; ## split scripts_out to create separate submission file for each sample/replicate
-my @split_array = glob "sub_job*";
-#print "$split_array[0]\n";
-my $pattern = $base_dir;
-foreach my$split_file(@split_array) {
-          open (my $splitfile,"<$split_file");
-          while (my$splitline = <$splitfile>) {
-                     if ($splitline =~/$pattern\/(\S+)\//){
-                        `mv $split_file SUB_$1`;
-		    	`qsub -l select=1:ncpus=1:mem=12GB -l walltime=70:00:00  SUB_$1`;
-	             	 last;
-      			}
-    	  }
- }
-   
 __END__
 
 =head1 NAME
