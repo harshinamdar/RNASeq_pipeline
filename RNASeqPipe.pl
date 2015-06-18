@@ -21,10 +21,8 @@ GetOptions('index=s'            => \$index,
 	   'is_stranded=s'	=> \$is_stranded,			 
 	   'help!' 		=> \$help,
 	   'man!' 		=> \$man,
- 	  'project_dir=s'     => \$project_dir );
-	  # 'project_dir=s' 	=> \$project_dir ) or pod2usage(-verbose => 0);
-          # 'project_dir=s'      => \$project_dir ) or pod2usage("Try '$0 --help' for more information.") unless $ARGV;
-	   pod2usage(-verbose => 1)  if ($help);
+ 	   'project_dir=s'     => \$project_dir );
+	    pod2usage(-verbose => 1)  if ($help);
 	   pod2usage(-verbose => 2)  if ($man);
 unless ( defined( $project_dir ) && defined( $index ) )
     {
