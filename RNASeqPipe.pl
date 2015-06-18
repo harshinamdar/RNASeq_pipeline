@@ -85,7 +85,7 @@ while (my $sub_folders = readdir($par_dir)) {
 	        print $outfile "tophat --library-type fr-firststrand -r 100 -p 8 -G $gtf -o $path/tophat_out_$sub_folders $ref_genome_index_base $R1 $R2\n\n";
 
 	 	### Can submit other jobs immeditely after tophat alignment : for ex; submitting a simeltaneous cufflinks job as shown below :
-		#print $outfile "echo cufflinks -p 8 -N -G $gtf  -M \$DM3_MASK_GTF -b $ref_genome_fasta -o $path/tophat_out_$sub_folders/cufflinks_$sub_folders -u --compatible-hits-norm $path/tophat_out_$sub_folders/accepted_hits.bam| qsub -N cuff_$sub_folders -V -cwd \n\n";
+		#print $outfile "echo cufflinks -p 8 -N -G $gtf  -b $ref_genome_fasta -o $path/tophat_out_$sub_folders/cufflinks_$sub_folders -u --compatible-hits-norm $path/tophat_out_$sub_folders/accepted_hits.bam| qsub -N cuff_$sub_folders -V -cwd \n\n";
 
 	 	print $outfile "samtools sort -n $path/tophat_out_$sub_folders/accepted_hits.bam $path/tophat_out_$sub_folders/sorted_bam_$sub_folders\n\n";
 		## -n : sort w.r.t. to name as required in htseq;  -o : sort w.r.t. to coordinates
