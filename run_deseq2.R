@@ -1,5 +1,4 @@
 #
-#.libPaths("/csc/analysis/Miguel-Aliaga/JJ/DESeq_Project_JJ/deseq2")
 
 library(DESeq2)
 library(RColorBrewer)
