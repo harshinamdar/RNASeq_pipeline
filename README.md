@@ -24,7 +24,7 @@ This script currently caters to single Project_dir. Future update will see proce
 
 For Quick tutorial on DESeq [Visit Here](http://harshinamdar.wordpress.com/2014/11/11/quick-tutorial-on-deseq2/) or execute the script `run_deseq2.R` once all the `.gene_counts` files are generated for each sample. 
       
-      The script `run_deseq2.R` requires two arguments 
+The script `run_deseq2.R` requires two arguments 
 
       Rscript run_deseq2.R /path/to/DESeq_Project_dir metaData.csv
      
